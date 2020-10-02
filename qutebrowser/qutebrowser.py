@@ -178,7 +178,7 @@ def debug_flag_error(flag):
     valid_flags = ['debug-exit', 'pdb-postmortem', 'no-sql-history',
                    'no-scroll-filtering', 'log-requests', 'log-cookies',
                    'lost-focusproxy', 'log-scroll-pos', 'stack', 'chromium',
-                   # 'wait-renderer-process', 'avoid-chromium-init', 'werror']
+                   'wait-renderer-process', 'avoid-chromium-init',
                    'werror', 'test-notification-service']
 
     if flag in valid_flags:
