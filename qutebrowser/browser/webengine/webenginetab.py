@@ -37,7 +37,8 @@ from qutebrowser.browser import (browsertab, eventfilter, shared, webelem,
 from qutebrowser.browser.webengine import (webview, webengineelem, tabhistory,
                                            interceptor, webenginequtescheme,
                                            cookies, webenginedownloads,
-                                           webenginesettings, certificateerror)
+                                           webenginesettings, certificateerror,
+                                           notification)
 from qutebrowser.misc import miscwidgets, objects, quitter
 from qutebrowser.utils import (usertypes, qtutils, log, javascript, utils,
                                message, objreg, jinja, debug)
@@ -61,6 +62,8 @@ def init():
     _qute_scheme_handler.install(webenginesettings.default_profile)
     if webenginesettings.private_profile:
         _qute_scheme_handler.install(webenginesettings.private_profile)
+
+    notification.init()
 
     log.init.debug("Initializing request interceptor...")
     req_interceptor = interceptor.RequestInterceptor(parent=app)
@@ -992,9 +995,9 @@ class _WebEnginePermissions(QObject):
         if on:
             timeout = config.val.content.fullscreen.overlay_timeout
             if timeout != 0:
-                notification = miscwidgets.FullscreenNotification(self._widget)
-                notification.set_timeout(timeout)
-                notification.show()
+                notif = miscwidgets.FullscreenNotification(self._widget)
+                notif.set_timeout(timeout)
+                notif.show()
 
     @pyqtSlot(QUrl, 'QWebEnginePage::Feature')
     def _on_feature_permission_requested(self, url, feature):
