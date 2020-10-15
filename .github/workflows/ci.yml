@@ -39,10 +39,10 @@ jobs:
             .tox
             ~/.cache/pip
           key: "${{ matrix.testenv }}-${{ hashFiles('misc/requirements/requirements-*.txt') }}-${{ hashFiles('requirements.txt') }}"
-      - uses: actions/setup-python@v2.1.2
+      - uses: actions/setup-python@v2
         with:
           python-version: '3.8'
-      - uses: actions/setup-node@v2.1.2
+      - uses: actions/setup-node@v2-beta
         with:
           node-version: '12.x'
         if: "matrix.testenv == 'eslint'"
@@ -57,7 +57,7 @@ jobs:
                 bindir="$HOME/.local/bin"
                 mkdir -p "$bindir"
                 wget -qO- "https://github.com/koalaman/shellcheck/releases/download/$scversion/shellcheck-$scversion.linux.x86_64.tar.xz" | tar -xJv --strip-components 1 -C "$bindir" shellcheck-$scversion/shellcheck
-                echo "::add-path::$bindir"
+                echo "$bindir" >> "$GITHUB_PATH"
             fi
             python -m pip install -U pip
             python -m pip install -U -r misc/requirements/requirements-tox.txt
@@ -157,7 +157,7 @@ jobs:
             ~/.cache/pip
           key: "${{ matrix.testenv }}-${{ matrix.os }}-${{ matrix.python }}-${{ hashFiles('misc/requirements/requirements-*.txt') }}-${{ hashFiles('requirements.txt') }}"
       - name: Set up Python
-        uses: actions/setup-python@v2.1.2
+        uses: actions/setup-python@v2
         with:
           python-version: "${{ matrix.python }}"
       - name: Set up problem matchers
@@ -178,7 +178,7 @@ jobs:
         if: "failure()"
       - name: Upload coverage
         if: "endsWith(matrix.testenv, '-cov')"
-        uses: codecov/codecov-action@v1.0.13
+        uses: codecov/codecov-action@v1
         with:
           name: "${{ matrix.testenv }}"
 
