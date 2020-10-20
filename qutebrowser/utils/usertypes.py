@@ -72,7 +72,12 @@ class NeighborList(typing.Sequence[_T]):
         _mode: The current mode.
     """
 
-    Modes = enum.Enum('Modes', ['edge', 'exception'])
+    class Modes(enum.Enum):
+
+        """Behavior for the 'mode' argument."""
+
+        edge = 1
+        exception = 2
 
     def __init__(self, items: typing.Sequence[_T] = None,
                  default: typing.Union[_T, Unset] = UNSET,
@@ -236,9 +241,15 @@ class NeighborList(typing.Sequence[_T]):
         return self.curitem()
 
 
-# The mode of a Question.
-PromptMode = enum.Enum('PromptMode', ['yesno', 'text', 'user_pwd', 'alert',
-                                      'download'])
+class PromptMode(enum.Enum):
+
+    """The mode of a Question."""
+
+    yesno = 1
+    text = 2
+    user_pwd = 3
+    alert = 4
+    download = 5
 
 
 class ClickTarget(enum.Enum):
@@ -285,13 +296,24 @@ class Exit(enum.IntEnum):
     err_init = 4
 
 
-# Load status of a tab
-LoadStatus = enum.Enum('LoadStatus', ['none', 'success', 'success_https',
-                                      'error', 'warn', 'loading'])
+class LoadStatus(enum.Enum):
+
+    """Load status of a tab."""
+
+    none = 1
+    success = 2
+    success_https = 3
+    error = 4
+    warn = 5
+    loading = 6
 
 
-# Backend of a tab
-Backend = enum.Enum('Backend', ['QtWebKit', 'QtWebEngine'])
+class Backend(enum.Enum):
+
+    """The backend being used (usertypes.backend)."""
+
+    QtWebKit = 1
+    QtWebEngine = 2
 
 
 class JsWorld(enum.Enum):
@@ -304,15 +326,36 @@ class JsWorld(enum.Enum):
     jseval = 4  #: World used for the jseval-command.
 
 
-# Log level of a JS message. This needs to match up with the keys allowed for
-# the content.javascript.log setting.
-JsLogLevel = enum.Enum('JsLogLevel', ['unknown', 'info', 'warning', 'error'])
+class JsLogLevel(enum.Enum):
+
+    """Log level of a JS message.
+
+    This needs to match up with the keys allowed for the
+    content.javascript.log setting.
+    """
+
+    unknown = 1
+    info = 2
+    warning = 3
+    error = 4
 
 
-MessageLevel = enum.Enum('MessageLevel', ['error', 'warning', 'info'])
+class MessageLevel(enum.Enum):
+
+    """The level of a message being shown."""
+
+    error = 1
+    warning = 2
+    info = 3
 
 
-IgnoreCase = enum.Enum('IgnoreCase', ['smart', 'never', 'always'])
+class IgnoreCase(enum.Enum):
+
+    """Possible values for the 'search.ignore_case' setting."""
+
+    smart = 1
+    never = 2
+    always = 3
 
 
 class CommandValue(enum.Enum):
@@ -470,16 +513,30 @@ class NavigationRequest:
 
     """A request to navigate to the given URL."""
 
-    Type = enum.Enum('Type', [
-        'link_clicked',
-        'typed',  # QtWebEngine only
-        'form_submitted',
-        'form_resubmitted',  # QtWebKit only
-        'back_forward',
-        'reloaded',
-        'redirect',  # QtWebEngine >= 5.14 only
-        'other'
-    ])
+    class Type(enum.Enum):
+
+        """The type of a request.
+
+        Based on QWebEngineUrlRequestInfo::NavigationType and QWebPage::NavigationType.
+        """
+
+        #: Navigation initiated by clicking a link.
+        link_clicked = 1
+        #: Navigation explicitly initiated by typing a URL (QtWebEngine only).
+        typed = 2
+        #: Navigation submits a form.
+        form_submitted = 3
+        #: An HTML form was submitted a second time (QtWebKit only).
+        form_resubmitted = 4
+        #: Navigation initiated by a history action.
+        back_forward = 5
+        #: Navigation initiated by refreshing the page.
+        reloaded = 6
+        #: Navigation triggered automatically by page content or remote server
+        #: (QtWebEngine >= 5.14 only)
+        redirect = 7
+        #: None of the above.
+        other = 8
 
     url = attr.ib()  # type: QUrl
     navigation_type = attr.ib()  # type: Type

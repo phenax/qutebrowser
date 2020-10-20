@@ -40,7 +40,15 @@ if typing.TYPE_CHECKING:
 
 
 STARTCHARS = ":/?"
-LastPress = enum.Enum('LastPress', ['none', 'filtertext', 'keystring'])
+
+
+class LastPress(enum.Enum):
+
+    """Whether the last keypress filtered a text or was part of a keystring."""
+
+    none = 1
+    filtertext = 2
+    keystring = 3
 
 
 class CommandKeyParser(basekeyparser.BaseKeyParser):

@@ -100,13 +100,23 @@ class UnsupportedOperationError(WebTabError):
     """Raised when an operation is not supported with the given backend."""
 
 
-TerminationStatus = enum.Enum('TerminationStatus', [
-    'normal',
-    'abnormal',  # non-zero exit status
-    'crashed',   # e.g. segfault
-    'killed',
-    'unknown',
-])
+class TerminationStatus(enum.Enum):
+
+    """How a QtWebEngine renderer process terminated.
+
+    Also see QWebEnginePage::RenderProcessTerminationStatus
+    """
+
+    #: Unknown render process status value gotten from Qt.
+    unknown = -1
+    #: The render process terminated normally.
+    normal = 0
+    #: The render process terminated with with a non-zero exit status.
+    abnormal = 1
+    #: The render process crashed, for example because of a segmentation fault.
+    crashed = 2
+    #: The render process was killed, for example by SIGKILL or task manager kill.
+    killed = 3
 
 
 @attr.s

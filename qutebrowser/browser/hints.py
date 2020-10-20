@@ -29,7 +29,7 @@ import enum
 from string import ascii_lowercase
 
 import attr
-from PyQt5.QtCore import pyqtSlot, QObject, Qt, QUrl
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QObject, Qt, QUrl
 from PyQt5.QtWidgets import QLabel
 
 from qutebrowser.config import config, configexc
@@ -42,10 +42,26 @@ if typing.TYPE_CHECKING:
     from qutebrowser.browser import browsertab
 
 
-Target = enum.Enum('Target', ['normal', 'current', 'tab', 'tab_fg', 'tab_bg',
-                              'window', 'yank', 'yank_primary', 'run', 'fill',
-                              'hover', 'download', 'userscript', 'spawn',
-                              'delete', 'right_click'])
+class Target(enum.Enum):
+
+    """What action to take on a hint."""
+
+    normal = 1
+    current = 2
+    tab = 3
+    tab_fg = 4
+    tab_bg = 5
+    window = 6
+    yank = 7
+    yank_primary = 8
+    run = 9
+    fill = 10
+    hover = 11
+    download = 12
+    userscript = 13
+    spawn = 14
+    delete = 15
+    right_click = 16
 
 
 class HintingError(Exception):
@@ -353,7 +369,7 @@ class HintManager(QObject):
         _tab_id: The tab ID this HintManager is associated with.
 
     Signals:
-        See HintActions
+        set_text: Request for the statusbar to change its text.
     """
 
     HINT_TEXTS = {
@@ -374,6 +390,8 @@ class HintManager(QObject):
         Target.spawn: "Spawn command via hint",
         Target.delete: "Delete an element",
     }
+
+    set_text = pyqtSignal(str)
 
     def __init__(self, win_id: int, parent: QObject = None) -> None:
         """Constructor."""
@@ -402,10 +420,8 @@ class HintManager(QObject):
         for label in self._context.all_labels:
             label.cleanup()
 
-        text = self._get_text()
-        message_bridge = objreg.get('message-bridge', scope='window',
-                                    window=self._win_id)
-        message_bridge.maybe_reset_text(text)
+        self.set_text.emit('')
+
         self._context = None
 
     def _hint_strings(self, elems: _ElemsType) -> _HintStringsType:
@@ -636,9 +652,7 @@ class HintManager(QObject):
         modeman.enter(self._win_id, usertypes.KeyMode.hint,
                       'HintManager.start')
 
-        message_bridge = objreg.get('message-bridge', scope='window',
-                                    window=self._win_id)
-        message_bridge.set_text(self._get_text())
+        self.set_text.emit(self._get_text())
 
         if self._context.first:
             self._fire(strings[0])
