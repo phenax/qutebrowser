@@ -21,15 +21,15 @@
 
 import os
 import sys
-import typing
 import argparse
+from typing import Any, Dict, Iterator, List, Optional, Sequence
 
 from qutebrowser.config import config
 from qutebrowser.misc import objects
 from qutebrowser.utils import usertypes, qtutils, utils
 
 
-def qt_args(namespace: argparse.Namespace) -> typing.List[str]:
+def qt_args(namespace: argparse.Namespace) -> List[str]:
     """Get the Qt QApplication arguments based on an argparse namespace.
 
     Args:
@@ -61,9 +61,7 @@ def qt_args(namespace: argparse.Namespace) -> typing.List[str]:
     return argv
 
 
-def _qtwebengine_enabled_features(
-        feature_flags: typing.Sequence[str],
-) -> typing.Iterator[str]:
+def _qtwebengine_enabled_features(feature_flags: Sequence[str]) -> Iterator[str]:
     """Get --enable-features flags for QtWebEngine.
 
     Args:
@@ -95,7 +93,7 @@ def _qtwebengine_enabled_features(
         # just turn it on unconditionally on Linux, which shouldn't hurt.
         yield 'WebRTCPipeWireCapturer'
 
-    if qtutils.version_check('5.11', compiled=False) and not utils.is_mac:
+    if not utils.is_mac:
         # Enable overlay scrollbars.
         #
         # There are two additional flags in Chromium:
@@ -114,19 +112,14 @@ def _qtwebengine_enabled_features(
 
 def _qtwebengine_args(
         namespace: argparse.Namespace,
-        feature_flags: typing.Sequence[str],
-) -> typing.Iterator[str]:
+        feature_flags: Sequence[str],
+) -> Iterator[str]:
     """Get the QtWebEngine arguments to use based on the config."""
     is_qt_514 = (qtutils.version_check('5.14', compiled=False) and
                  not qtutils.version_check('5.15', compiled=False))
 
-    if not qtutils.version_check('5.11', compiled=False) or is_qt_514:
-        # WORKAROUND equivalent to
-        # https://codereview.qt-project.org/#/c/217932/
-        # Needed for Qt < 5.9.5 and < 5.10.1
-        #
-        # For Qt 5,14, WORKAROUND for
-        # https://bugreports.qt.io/browse/QTBUG-82105
+    if is_qt_514:
+        # WORKAROUND for https://bugreports.qt.io/browse/QTBUG-82105
         yield '--disable-shared-workers'
 
     # WORKAROUND equivalent to
@@ -162,8 +155,8 @@ def _qtwebengine_args(
     yield from _qtwebengine_settings_args()
 
 
-def _qtwebengine_settings_args() -> typing.Iterator[str]:
-    settings = {
+def _qtwebengine_settings_args() -> Iterator[str]:
+    settings: Dict[str, Dict[Any, Optional[str]]] = {
         'qt.force_software_rendering': {
             'software-opengl': None,
             'qt-quick': None,
@@ -201,14 +194,7 @@ def _qtwebengine_settings_args() -> typing.Iterator[str]:
             'never': '--no-referrers',
             'same-domain': '--reduced-referrer-granularity',
         }
-    }  # type: typing.Dict[str, typing.Dict[typing.Any, typing.Optional[str]]]
-
-    if not qtutils.version_check('5.11'):
-        # On Qt 5.11, we can control this via QWebEngineSettings
-        settings['content.autoplay'] = {
-            True: None,
-            False: '--autoplay-policy=user-gesture-required',
-        }
+    }
 
     if qtutils.version_check('5.14'):
         settings['colors.webpage.prefers_color_scheme_dark'] = {

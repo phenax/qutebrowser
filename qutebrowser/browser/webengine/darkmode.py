@@ -74,7 +74,7 @@ Prefix changed to "forceDarkMode".
 """
 
 import enum
-import typing
+from typing import Any, Iterable, Iterator, Mapping, Optional, Set, Tuple, Union
 
 try:
     from PyQt5.QtWebEngine import PYQT_WEBENGINE_VERSION
@@ -90,13 +90,12 @@ class Variant(enum.Enum):
 
     """A dark mode variant."""
 
-    unavailable = -1
-    qt_510 = 0
-    qt_511_to_513 = 1
-    qt_514 = 2
-    qt_515_0 = 3
-    qt_515_1 = 4
-    qt_515_2 = 5
+    unavailable = enum.auto()
+    qt_511_to_513 = enum.auto()
+    qt_514 = enum.auto()
+    qt_515_0 = enum.auto()
+    qt_515_1 = enum.auto()
+    qt_515_2 = enum.auto()
 
 
 # Mapping from a colors.webpage.darkmode.algorithm setting value to
@@ -119,9 +118,6 @@ _IMAGE_POLICIES = {
     'never': 1,  # kFilterNone
     'smart': 2,  # kFilterSmart
 }
-# Image policy smart is not available with Qt 5.10
-_IMAGE_POLICIES_QT_510 = _IMAGE_POLICIES.copy()
-_IMAGE_POLICIES_QT_510['smart'] = _IMAGE_POLICIES['never']
 
 # Mapping from a colors.webpage.darkmode.policy.page setting value to
 # Chromium's DarkModePagePolicy enum values.
@@ -135,17 +131,17 @@ _BOOLS = {
     False: 'false',
 }
 
-_DarkModeSettingsType = typing.Iterable[
-    typing.Tuple[
+_DarkModeSettingsType = Iterable[
+    Tuple[
         str,  # qutebrowser option name
         str,  # darkmode setting name
         # Mapping from the config value to a string (or something convertable
         # to a string) which gets passed to Chromium.
-        typing.Optional[typing.Mapping[typing.Any, typing.Union[str, int]]],
+        Optional[Mapping[Any, Union[str, int]]],
     ],
 ]
 
-_DarkModeDefinitionType = typing.Tuple[_DarkModeSettingsType, typing.Set[str]]
+_DarkModeDefinitionType = Tuple[_DarkModeSettingsType, Set[str]]
 
 _QT_514_SETTINGS = [
     ('policy.images', 'darkModeImagePolicy', _IMAGE_POLICIES),
@@ -162,7 +158,7 @@ _QT_514_SETTINGS = [
 # mandatory setting - except on Qt 5.15.0 where we don't, so we don't get the
 # workaround warning below if the setting wasn't explicitly customized.
 
-_DARK_MODE_DEFINITIONS = {
+_DARK_MODE_DEFINITIONS: Mapping[Variant, _DarkModeDefinitionType] = {
     Variant.unavailable: ([], set()),
 
     Variant.qt_515_2: ([
@@ -234,15 +230,7 @@ _DARK_MODE_DEFINITIONS = {
         ('contrast', 'highContrastContrast', None),
         ('grayscale.all', 'highContrastGrayscale', _BOOLS),
     ], {'algorithm', 'policy.images'}),
-
-    Variant.qt_510: ([
-        ('algorithm', 'highContrastMode', _ALGORITHMS_BEFORE_QT_514),
-
-        ('policy.images', 'highContrastImagePolicy', _IMAGE_POLICIES_QT_510),
-        ('contrast', 'highContrastContrast', None),
-        ('grayscale.all', 'highContrastGrayscale', _BOOLS),
-    ], {'algorithm'}),
-}  # type: typing.Mapping[Variant, _DarkModeDefinitionType]
+}
 
 
 def _variant() -> Variant:
@@ -261,20 +249,15 @@ def _variant() -> Variant:
             return Variant.qt_511_to_513
         raise utils.Unreachable(hex(PYQT_WEBENGINE_VERSION))
 
-    # If we don't have PYQT_WEBENGINE_VERSION, we'll need to assume based on the Qt
-    # version.
+    # If we don't have PYQT_WEBENGINE_VERSION, we're on 5.12 (or older, but 5.12 is the
+    # oldest supported version).
     assert not qtutils.version_check(  # type: ignore[unreachable]
         '5.13', compiled=False)
 
-    if qtutils.version_check('5.11', compiled=False):
-        return Variant.qt_511_to_513
-    elif qtutils.version_check('5.10', compiled=False):
-        return Variant.qt_510
-
-    return Variant.unavailable
+    return Variant.qt_511_to_513
 
 
-def settings() -> typing.Iterator[typing.Tuple[str, str]]:
+def settings() -> Iterator[Tuple[str, str]]:
     """Get necessary blink settings to configure dark mode for QtWebEngine."""
     if not config.val.colors.webpage.darkmode.enabled:
         return
