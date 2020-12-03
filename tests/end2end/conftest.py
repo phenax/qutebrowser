@@ -36,7 +36,7 @@ from PyQt5.QtCore import PYQT_VERSION, QCoreApplication
 pytest.register_assert_rewrite('end2end.fixtures')
 
 from end2end.fixtures.notificationserver import notification_server
-from end2end.fixtures.webserver import server, server_per_test, ssl_server
+from end2end.fixtures.webserver import server, server_per_test, server2, ssl_server
 from end2end.fixtures.quteprocess import (quteproc_process, quteproc,
                                           quteproc_new)
 from end2end.fixtures.testprocess import pytest_runtest_makereport

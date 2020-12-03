@@ -32,6 +32,8 @@ The following userscripts are included in the current directory.
 - [tor_identity](./tor_identity): Change your tor identity.
 - [view_in_mpv](./view_in_mpv): Views the current web page in mpv using
   sensible mpv-flags.
+- [qr](./qr): Show a QR code for the current webpage via
+  [qrencode](https://fukuchi.org/works/qrencode/).
 
 [castnow]: https://github.com/xat/castnow
 [youtube-dl]: https://rg3.github.io/youtube-dl/
@@ -67,6 +69,8 @@ The following userscripts can be found on their own repositories.
    and retrieve they when you want.
 - [doi](https://github.com/cadadr/configuration/blob/master/qutebrowser/userscripts/doi):
   Opens DOIs on Sci-Hub.
+- [1password](https://github.com/tomoakley/dotfiles/blob/master/qutebrowser/userscripts/1password):
+  Integration with 1password on macOS.
 
 [Zotero]: https://www.zotero.org/
 [Pocket]: https://getpocket.com/

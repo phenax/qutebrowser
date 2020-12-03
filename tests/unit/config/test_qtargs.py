@@ -116,7 +116,7 @@ class TestQtArgs:
     def test_in_process_stack_traces(self, monkeypatch, parser, backend,
                                      version_check, debug_flag, expected):
         monkeypatch.setattr(qtargs.qtutils, 'version_check',
-                            lambda version, compiled=False: version_check)
+                            lambda version, compiled=False, exact=False: version_check)
         monkeypatch.setattr(qtargs.objects, 'backend', backend)
         parsed = parser.parse_args(['--debug-flag', 'stack'] if debug_flag
                                    else [])
@@ -252,14 +252,31 @@ class TestQtArgs:
         else:
             assert arg in args
 
-    @pytest.mark.parametrize('referer, arg', [
-        ('always', None),
-        ('never', '--no-referrers'),
-        ('same-domain', '--reduced-referrer-granularity'),
+    @pytest.mark.parametrize('qt_version, referer, arg', [
+        # 'always' -> no arguments
+        ('5.15.0', 'always', None),
+
+        # 'never' is handled via interceptor for most Qt versions
+        ('5.12.3', 'never', '--no-referrers'),
+        ('5.12.4', 'never', None),
+        ('5.13.0', 'never', '--no-referrers'),
+        ('5.13.1', 'never', None),
+        ('5.14.0', 'never', None),
+        ('5.15.0', 'never', None),
+
+        # 'same-domain' - arguments depend on Qt versions
+        ('5.13.0', 'same-domain', '--reduced-referrer-granularity'),
+        ('5.14.0', 'same-domain', '--enable-features=ReducedReferrerGranularity'),
+        ('5.15.0', 'same-domain', '--enable-features=ReducedReferrerGranularity'),
     ])
-    def test_referer(self, config_stub, monkeypatch, parser, referer, arg):
-        monkeypatch.setattr(qtargs.objects, 'backend',
-                            usertypes.Backend.QtWebEngine)
+    def test_referer(self, config_stub, monkeypatch, parser, qt_version, referer, arg):
+        monkeypatch.setattr(qtargs.objects, 'backend', usertypes.Backend.QtWebEngine)
+        monkeypatch.setattr(qtargs.qtutils, 'qVersion', lambda: qt_version)
+
+        # Avoid WebRTC pipewire feature
+        monkeypatch.setattr(qtargs.utils, 'is_linux', False)
+        # Avoid overlay scrollbar feature
+        config_stub.val.scrolling.bar = 'never'
 
         config_stub.val.content.headers.referer = referer
         parsed = parser.parse_args([])
@@ -268,6 +285,7 @@ class TestQtArgs:
         if arg is None:
             assert '--no-referrers' not in args
             assert '--reduced-referrer-granularity' not in args
+            assert '--enable-features=ReducedReferrerGranularity' not in args
         else:
             assert arg in args
 
