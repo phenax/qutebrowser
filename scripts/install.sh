@@ -12,7 +12,7 @@ build() {
 }
 
 package() {
-    sudo make -f misc/Makefile PREFIX=/usr install;
+    make -f misc/Makefile PREFIX=/usr install;
 }
 
 cleanup() {
