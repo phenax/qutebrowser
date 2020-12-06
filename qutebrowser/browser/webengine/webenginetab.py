@@ -38,7 +38,6 @@ from qutebrowser.browser.webengine import (webview, webengineelem, tabhistory,
                                            webenginesettings, certificateerror,
                                            notification)
 from qutebrowser.misc import miscwidgets, objects, quitter
-                                           webenginesettings, certificateerror)
 from qutebrowser.utils import (usertypes, qtutils, log, javascript, utils,
                                message, jinja, debug)
 from qutebrowser.qt import sip
